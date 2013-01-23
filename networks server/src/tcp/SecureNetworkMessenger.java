@@ -36,6 +36,8 @@ public class SecureNetworkMessenger implements Runnable, Messenger {
 	private static MessageQueue incomingMessagesQueue = MessageQueue.getInstance();
 	private static SecureNetworkMessenger instance;// = new SecureNetworkMessenger();
 	
+	public static InetAddress clientAddress = null;
+	
 	public static SecureNetworkMessenger getSecureInstance(){
 		if(instance == null)
 			instance = new SecureNetworkMessenger();
@@ -72,7 +74,7 @@ public class SecureNetworkMessenger implements Runnable, Messenger {
                     (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         SSLServerSocket sslserversocket;
 		try {
-			System.out.println("Desktop starting at port " + PORT);
+			System.out.println("SERVER starting at port " + PORT);
 			sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket();
 			//certificate is made with: "keytool -genkey keystore -keyalg RSA"
 			//this below is a 'hack' (the hack was adding all cipher suites, this is the only one we actually need)
@@ -81,8 +83,10 @@ public class SecureNetworkMessenger implements Runnable, Messenger {
 			sslserversocket.bind(new InetSocketAddress(thisHost, PORT));
 			
 			SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
-
-            InputStream inputstream = sslsocket.getInputStream();
+			
+			clientAddress = sslsocket.getInetAddress();
+            
+			InputStream inputstream = sslsocket.getInputStream();
             OutputStream outputstream  = sslsocket.getOutputStream();
     	    
 			outgoingSerial = new ObjectOutputStream(outputstream);
